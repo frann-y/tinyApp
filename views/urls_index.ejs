@@ -1,0 +1,31 @@
+<!--This will display all the urls and their shortened forms-->
+
+<!DOCTYPE html>
+
+<html lang = "en">
+    <head>
+        <% include ./partials/_header.ejs %>
+        <title>TinyApp</title>
+    </head>
+    <body>
+        <!--Add your EJS code here -->
+        <div>
+
+        <!--Link! But empty-->
+            <a href='#'>LINK!! (Not Zelda)</a>
+            <ul>
+        <!--Loop through Urls and display long and short-->
+            <% for (var shortURL in urls) { %>
+               <li>
+                
+                <!--long urls?-->
+                <%= urls[shortURL] %> 
+                <!--short urls?-->
+                <%= shortURL %>
+                
+               </li>
+            <% } %>
+            </ul>
+        </div>
+    </body>
+</html>
