@@ -51,6 +51,14 @@ app.get("/urls/new", (req, res) => {
   res.render("urls_new");
 });
 
+//adding a route to handle shortURL requests
+app.get("/u/:shortURL", (req, res) => {
+  let longURL = urlDatabase[req.params.shortURL]; //URL part 2 takes whatever parameters u have //creating a key w what person has entered
+  //URL part 2: req . params gets everything after the colon. so has to be EXACT! 
+  res.redirect(longURL);
+  //
+});
+
 // adding a route handler for which will render it's template
 //had to add long urls, object hard to understand
 app.get("/urls/:id", (req, res) => {
@@ -60,8 +68,11 @@ app.get("/urls/:id", (req, res) => {
 
 app.post("/urls", (req, res) => {
   console.log(req.body);  // debug statement to see POST parameters
-  res.send("Ok");         // Respond with 'Ok' (we will replace this)
-});
+  //res.send("Ok");         // Respond with 'Ok' (we will replace this)
+  const shortUrl = generateRandomString(); //URL part 2 assigns a radom keyword 
+  urlDatabase[shortUrl] = req.body.longURL; //URL part 2 assigning what long url we type to the random gen num
+  res.redirect(`/urls/${shortUrl}`); //URL part 2 redirect to the page that has the short url 
+})
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
