@@ -74,6 +74,14 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${shortUrl}`); //URL part 2 redirect to the page that has the short url 
 })
 
+app.post("/urls/:id/delete", (req, res) => {
+  delete urlDatabase[req.params.id]//DELETING URLS: url database //req.body gets info from form inputs req.params = retrieve from the routes
+  //console.log("REQ.PARAMS === ", req.params.id); DELETING URLS: //test to see what it gets
+  res.redirect(`/urls`) //redirect to indexpage //DELETING URLS: can inspect source for a lot of things
+})
+
+
+
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });

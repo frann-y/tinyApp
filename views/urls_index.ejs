@@ -19,10 +19,12 @@
                <li>
                 
                 <!--long urls?-->
-                <%= urls[shortURL] %> 
+                <%= urls[shortURL] %>  ----->
                 <!--short urls?-->
                 <%= shortURL %>
-                
+                <form method="POST" action="/urls/<%= shortURL %>/delete"> <!--= makes it seen, want it seen!-->
+                    <input type="submit" value="Delete">
+                </form>
                </li>
             <% } %>
             </ul>
