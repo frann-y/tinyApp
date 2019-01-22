@@ -66,20 +66,39 @@ app.get("/urls/:id", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
+//assigning random keyword to added urls
 app.post("/urls", (req, res) => {
-  console.log(req.body);  // debug statement to see POST parameters
+  //console.log(req.body);  // debug statement to see POST parameters
   //res.send("Ok");         // Respond with 'Ok' (we will replace this)
-  const shortUrl = generateRandomString(); //URL part 2 assigns a radom keyword 
+  const shortUrl = generateRandomString(); //URL part 2 assigns a random keyword 
   urlDatabase[shortUrl] = req.body.longURL; //URL part 2 assigning what long url we type to the random gen num
   res.redirect(`/urls/${shortUrl}`); //URL part 2 redirect to the page that has the short url 
 })
 
+//Post for deleting a url
 app.post("/urls/:id/delete", (req, res) => {
   delete urlDatabase[req.params.id]//DELETING URLS: url database //req.body gets info from form inputs req.params = retrieve from the routes
   //console.log("REQ.PARAMS === ", req.params.id); DELETING URLS: //test to see what it gets
-  res.redirect(`/urls`) //redirect to indexpage //DELETING URLS: can inspect source for a lot of things
+  res.redirect(`/urls`); //redirect to indexpage //DELETING URLS: can inspect source for a lot of things
 })
 
+//Post for Updating a URl
+app.post("/urls/:id", (req, res) => {
+  //extract the value of the id in the url
+  //req.params
+  console.log(req.params);
+  const shortUrlId = req.params.id;
+  //extract the long url value from the form
+  console.log(req.body);
+  const longUrl = req.body.longURL;
+  //req.body
+  //update the value in the url database
+  urlDatabase[shortUrlId] = longUrl;
+
+  //name key=value
+  //redirect to /urls
+  res.redirect(`/urls`);
+})
 
 
 app.listen(PORT, () => {

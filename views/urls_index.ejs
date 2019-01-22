@@ -21,7 +21,10 @@
                 <!--long urls?-->
                 <%= urls[shortURL] %>  ----->
                 <!--short urls?-->
-                <%= shortURL %>
+                <%= shortURL %> 
+                <br>
+                <a href= "/urls/<%= shortURL %>">Edit</a>
+                <br>
                 <form method="POST" action="/urls/<%= shortURL %>/delete"> <!--= makes it seen, want it seen!-->
                     <input type="submit" value="Delete">
                 </form>

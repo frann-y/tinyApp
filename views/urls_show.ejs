@@ -1,19 +1,17 @@
 
 <% include partials/_header %>
 
-<%= shortURL %>
-<%= longURL %>
+<div>
+    Short URL!
+</div>
+<div>
+    <%= shortURL %>
+</div>
 
 
-<!DOCTYPE html>
-<html lang="en">
-  <head></head>
-  <body style="font-size:20px; padding:50px;">
-    <% include partials/_header %>
-    <form action="/urls" method="POST" style="margin:150px;">
-      <label for="longURL">Enter a URL:</label>
-      <input id="longURL" type="text" name="longURL" placeholder="http://" style="width: 300px">
-      <input type="submit" value="Submit">
-    </form>
-  </body>
-</html>
+<form action= "/urls/<%= shortURL %>" method="POST" style="margin:150px;">
+    <input id="longURL" type="text" name="longURL" value="<%= longURL %>" style="width: 300px">
+    <input type="submit" value="Update"> <!--update button -->
+</form>
+<!-- changed the placeholder to value so we can update the value of it la la add more notes-->
+
