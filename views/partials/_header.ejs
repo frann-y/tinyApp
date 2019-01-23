@@ -2,15 +2,17 @@
     <h2>!TINY APP!</h2>
     <!-- Form to Log In action was given in instructions.-->
     
-<% if (username) { %>
-    <h2><%= username %></h2>
+<% if (user) { %>
+    <h2><%= user %></h2>
     <form action= "/logout" method="POST"">
         <input type="submit" value="Logout"> <!--logout button -->
 </form>
 <% } else { %>
-    <form action= "/login" method="POST"">
-        <input id="username" type="text" name="username">
+    <form action= "/login" method="GET"">
         <input type="submit" value="Login"> <!--login button -->
+    </form>
+    <form action= "/register" method="GET"">
+        <input type="submit" value="Register"> <!--rgister button -->
     </form>
 <% } %>
 </header>

@@ -24,6 +24,30 @@ var urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+//User objects. data store for users.
+const users = { 
+  "userRandomID": {
+    id: "userRandomID", 
+    email: "user@example.com", 
+    password: "purple-monkey-dinosaur"
+  },
+ "user2RandomID": {
+    id: "user2RandomID", 
+    email: "user2@example.com", 
+    password: "dishwasher-funk"
+  },
+  "Archie" : {
+    id: "archieID",
+    email: "andrews@example.com",
+    password: "<3veronicaLodge"
+  },
+  "Bob" : {
+    id: "bob",
+    email: "bob@example.com",
+    password: "bob"
+  }
+}
+
 //generates random 6 string id
 function generateRandomString() {
   return uuidv4().substr(0, 6);
@@ -50,7 +74,7 @@ app.get("/hello", (req, res) => {
 app.get("/urls",  (req, res) => {
     let templateVars = { 
       urls: urlDatabase,
-      username: req.cookies["username"]
+      user: req.cookies["userId"]
      };
     res.render("urls_index", templateVars);
 });
@@ -60,7 +84,7 @@ app.get("/urls",  (req, res) => {
 app.get("/urls/new", (req, res) => {
   let templateVars = { 
     urls: urlDatabase,
-    username: req.cookies["username"]
+    user: req.cookies["userId"]
   }
   res.render("urls_new", templateVars);
 });
@@ -73,16 +97,101 @@ app.get("/u/:shortURL", (req, res) => {
   //
 });
 
+//Get for Register page
+app.get("/register", (req, res) => {
+  let templateVars = {
+    shortURL:  req.params.id, 
+    longURL: urlDatabase[req.params.id],
+    user: req.cookies["userId"],
+  };
+ res.render("urls_register", templateVars);
+})
+
+//Post for Register Page
+app.post("/register", (req, res) => {
+  //register post, fill in later
+   let userId = generateRandomString();
+   let newEmail = req.body.email;
+   let password = req.body.password;
+ 
+   const newUser = {
+     id: userId,
+     email: newEmail,
+     password: password,
+   }
+ 
+ 
+   if (!password || !newEmail ) {
+     res.status(400);
+     res.send('Empty form');
+   } else if (uniqueEmail() === false) {
+     res.status(400);
+     res.send('Email in use!');
+   } else {
+     users[userId] = newUser;
+     res.cookie("userId", userId);  
+     res.redirect(`/urls`);
+   }
+ 
+   function uniqueEmail() {
+     for (let user in users) {
+       if (users[user].email === newEmail) {
+         return false;
+       }
+     }
+     return true;
+   }
+ 
+ });
+
+
+//Get login Page
+app.get("/login", (req, res) => {
+  let templateVars = {
+    shortURL:  req.params.id, 
+    longURL: urlDatabase[req.params.id],
+    user: req.cookies["userId"],
+  };
+  res.render("urls_login", templateVars);
+})
+
+
+//Post login page
+app.post("/login", (req, res) => {
+  let email = req.body.email;
+  let password = req.body.password;
+  let loginID = signInCheck();
+  if (loginID) {
+    res.cookie("userId", loginID).redirect('/urls')
+  } else {
+    res.status(403).send('Error 403 something went wrong :(');
+  }
+
+  function signInCheck() {
+    for (let user in users) {
+      if (users[user].email === email) {
+        if (users[user].password === password) {
+          return users[user].id;
+        }
+        return false;
+      }
+    }
+    return false;
+  }
+});
+
+
 // adding a route handler for which will render it's template
 //had to add long urls, object hard to understand
 app.get("/urls/:id", (req, res) => {
   let templateVars = {
     shortURL:  req.params.id, 
     longURL: urlDatabase[req.params.id],
-    username: req.cookies["username"],
+    user: req.cookies["userId"],
   };
   res.render("urls_show", templateVars);
 });
+
 
 //assigning random keyword to added urls
 app.post("/urls", (req, res) => {
@@ -118,21 +227,13 @@ app.post("/urls/:id", (req, res) => {
   res.redirect(`/urls`);
 })
 
-//Login Post from _header
-app.post("/login", (req, res) => {
-  //res.cookie
-  let userLogin = req.body.username;
-  res.cookie("username", userLogin);//give username/whatever you input)
-  //res.redirect to urls
-  res.redirect(`/urls`);
-})
-
 //Logout Post for _header
 app.post("/logout", (req, res) => {
   //clearcookie
-  res.clearCookie("username");
+  res.clearCookie("userId");
   res.redirect(`/urls`);
 })
+
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
