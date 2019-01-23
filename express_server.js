@@ -54,9 +54,6 @@ function generateRandomString() {
 }
 
 
-//addcookieparser 
-
-
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
@@ -86,8 +83,27 @@ app.get("/urls/new", (req, res) => {
     urls: urlDatabase,
     user: req.cookies["userId"]
   }
-  res.render("urls_new", templateVars);
+//check if user is logged in
+//if loggedIn == render /urls/new
+// else === render /login
+  if (req.cookies["userId"]) {
+    res.render("urls_new", templateVars);
+  } else {
+    res.redirect("/login");
+  }
 });
+
+
+
+
+
+
+
+
+
+
+
+
 
 //adding a route to handle shortURL requests
 app.get("/u/:shortURL", (req, res) => {
