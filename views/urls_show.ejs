@@ -1,13 +1,15 @@
-
+<!DOCTYPE html>
+<html lang="en">
+  <head>
 <% include partials/_header %>
-
+  </head>
+  
 <div>
     Short URL!
 </div>
 <div>
     <%= shortURL %>
 </div>
-
 
 <form action= "/urls/<%= shortURL %>" method="POST" style="margin:150px;">
     <input id="longURL" type="text" name="longURL" value="<%= longURL %>" style="width: 300px">

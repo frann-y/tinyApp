@@ -1,37 +1,62 @@
 <!--This will display all the urls and their shortened forms-->
 
 <!DOCTYPE html>
-
 <html lang = "en">
     <head>
         <title>TinyApp</title>
     </head>
+   
     <body>
         <!--Add your EJS code here -->
         <% include partials/_header %>
         <div>
-
         <!--Link! But empty-->
-            <a href='#'>LINK!! (Not Zelda)</a>
+          <!--  <a href='#'>LINK!! (Not Zelda)</a> -->
             <ul>
-        <!--Loop through Urls and display long and short-->
-            <% for (var shortURL in urls) { %>
-               <li>
+
+            <% if (user) { %>        
+            <!--Loop through Urls and display long and short-->
+                <% for (var shortURL in urls) { %>
+                    <li>
                 
-                <!--long urls?-->
-                <%= urls[shortURL] %>  ----->
+            <!--long urls?-->
+                    <%= urls[shortURL].longURL %>  ----->
                 <!--short urls?-->
-                <%= shortURL %> 
-                <br>
-                <a href= "/urls/<%= shortURL %>">Edit</a>
-                <br>
-                <form method="POST" action="/urls/<%= shortURL %>/delete"> <!--= makes it seen, want it seen!-->
-                    <input type="submit" value="Delete">
+                    <%= shortURL %> 
+                    <br>
+                    
+                    <a href= "/urls/<%= shortURL %>">Edit</a>
+                    
+                    <br>
+                    
+                    <form method="POST" action="/urls/<%= shortURL %>/delete"> <!--= makes it seen, want it seen!-->
+                        <input type="submit" value="Delete">
+                    </form>
+               <% } %>
+                    </li>
+            <% } else { %>
+                <h3>Please Login...</h3>
+                <form action= "/login" method="GET"">
+                    <input type="submit" value="Login"> <!--login button -->
                 </form>
-               </li>
             <% } %>
             </ul>
         </div>
     </body>
+
+    <body>
+        <ul>
+        <h4>Add a New URL</h4>
+        <form action = "/urls/new" method "get">
+            <input type = 'submit' value = "New URL">
+        </form>
+        </ul>
+    </body>
 </html>
+
+
+
+
+
+
 
