@@ -1,19 +1,13 @@
-//the body-parser library will allow us to access POST request parameters, such as req.body.longURL
-//the bodyParse library will allow us to acces Post REQUEST PARAMETERS
-//such as req.body.longURL which we will store in a variable called urlDatabase
-//later we will store them in a real database. for now just communication between 
-//server ad client
-const bodyParser = require("body-parser");
 
+const bodyParser = require("body-parser");
 const uuidv4 = require('uuid/v4');
-//require should be grouped together
 const express = require("express");
 const app = express();
-const PORT = 3001; // default port 8080
-const cookieSession = require('cookie-session');//cookie parser replace with cookieSession
-const bcrypt = require('bcrypt'); //bcrypt for passwords
+const PORT = 8080; // default port 8080
+const cookieSession = require('cookie-session');
+const bcrypt = require('bcrypt');
 
-//Use and Set?
+//Use and Set
 app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieSession({
@@ -22,7 +16,7 @@ app.use(cookieSession({
 }))
 
 
-//this is getting my diff routes
+//URL Database by ID
 var urlDatabase = {
   "b2xVn2": {
     userID: "userRandomID",
@@ -33,10 +27,10 @@ var urlDatabase = {
     userID: "bob",
     shortURL: "9sm5xK",
     longURL: "http://www.google.com"
-}
+  }
 };
 
-//User objects. data store for users.
+//User objects. Data stored for users.
 const users = { 
   "userRandomID": {
     id: "userRandomID", 
@@ -65,6 +59,8 @@ const users = {
   }
 }
 
+//----------------Get/Post-----------------------------
+//Adding routes: the order of route definitions matters
 
 app.get("/", (req, res) => {
   res.send("Hello!");
@@ -78,8 +74,6 @@ app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
 
-// adding a route handler for /urls. using res.render()
-    //to pass the URL data to your template 
 app.get("/urls",  (req, res) => {
     let templateVars = { 
       urls: urlsForUser(req.session.userId),
@@ -88,16 +82,26 @@ app.get("/urls",  (req, res) => {
     res.render("urls_index", templateVars);
 });
 
-//adding a route to urls_new.ejs
-//the order of route definitions matters
+app.post("/urls", (req, res) => {
+  let shortUrl = generateRandomString(); //URL part 2 assigns a random keyword 
+  let longUrl = req.body.longURL;
+  let userID = req.session.userId;
+  let newURL = {
+    "userID": userID,
+    "shortURL":shortUrl,
+    "longURL": longUrl,
+  }
+  urlDatabase[shortUrl] = newURL; //URL part 2 assigning what long url we type to the random gen num
+  res.redirect(`/urls`);
+})
+
+
 app.get("/urls/new", (req, res) => {
   let templateVars = { 
     urls: urlDatabase,
     user: req.session.userId,
   }
-//check if user is logged in
-//if loggedIn == render /urls/new
-// else === render /login
+  //check if user is logged in
   if (req.session.userId) {
     res.render("urls_new", templateVars);
   } else {
@@ -105,20 +109,12 @@ app.get("/urls/new", (req, res) => {
   }
 });
 
-
-
-
-
-
 //adding a route to handle shortURL requests
 app.get("/u/:shortURL", (req, res) => {
-  let longURL = urlDatabase[req.params.shortURL].longURL; //URL part 2 takes whatever parameters u have //creating a key w what person has entered //redirects to the actual page of the short url
-  //URL part 2: req . params gets everything after the colon. so has to be EXACT! 
+  let longURL = urlDatabase[req.params.shortURL].longURL; 
   res.redirect(longURL);
-  //
 });
 
-//Get for Register page
 app.get("/register", (req, res) => {
   let templateVars = { 
     urls: urlsForUser(req.session.userId),
@@ -127,23 +123,18 @@ app.get("/register", (req, res) => {
  res.render("urls_register", templateVars);
 })
 
-//Post for Register Page
 app.post("/register", (req, res) => {
-  //register post, fill in later
    let userId = generateRandomString();
    let newEmail = req.body.email;
    let password = req.body.password;
-   const hashedPassword = bcrypt.hashSync(password, 10); //Is the line of code to crypt passwords
+   const hashedPassword = bcrypt.hashSync(password, 10); //the line of code to crypt passwords
 
-   //console.log(hashedPassword) //test to see if get encrypted password;
- 
    const newUser = {
      id: userId,
      email: newEmail,
      password: password,
-     hashedPassword: hashedPassword, //setting hashed passwords it in the new UserObject 
+     hashedPassword: hashedPassword, //setting hashed passwords in the new UserObject 
    }
- 
  
    if (!password || !newEmail ) {
      res.status(400);
@@ -153,7 +144,7 @@ app.post("/register", (req, res) => {
      res.send('Email in use!');
    } else {
      users[userId] = newUser;
-     req.session.userId = userId; //before res.cookie("userId", userId); //
+     req.session.userId = userId;
      res.redirect(`/urls`);
    }
  
@@ -165,11 +156,9 @@ app.post("/register", (req, res) => {
      }
      return true;
    }
- 
+
  });
 
-
-//Get login Page
 app.get("/login", (req, res) => {
   let templateVars = { 
     urls: urlsForUser(req.session.userId),
@@ -178,8 +167,6 @@ app.get("/login", (req, res) => {
   res.render("urls_login", templateVars);
 })
 
-
-//Post login page
 app.post("/login", (req, res) => {
   let email = req.body.email;
   let password = req.body.password;
@@ -188,7 +175,7 @@ app.post("/login", (req, res) => {
     req.session.userId = loginID;
     res.redirect('/urls');
   } else {
-    res.status(403).send('Error 403 something went wrong :(');
+    res.status(403).send('Error 403: Something went wrong.');
   }
 
   function signInCheck() {
@@ -205,8 +192,6 @@ app.post("/login", (req, res) => {
 });
 
 
-// adding a route handler for which will render it's template
-//had to add long urls, object hard to understand
 app.get("/urls/:id", (req, res) => {
   let templateVars = {
     shortURL:  req.params.id, 
@@ -214,71 +199,39 @@ app.get("/urls/:id", (req, res) => {
     user: req.session.userId,
     urls: urlsForUser(req.session.userId)
   };
-  if(req.session.userId === urlDatabase[req.params.id].userID) {
+  if (req.session.userId === urlDatabase[req.params.id].userID) {
     res.render("urls_show", templateVars);
   } else {
-    res.status(403).send(`Error 403: You suck! and don't got no access to dis here page!!`);
+    res.status(403).send(`Error 403: You do not have access to this page.`);
   }
 });
 
-
-//assigning random keyword to added urls
-app.post("/urls", (req, res) => {
-  //console.log(req.body);  // debug statement to see POST parameters
-  //res.send("Ok");         // Respond with 'Ok' (we will replace this)
-  let shortUrl = generateRandomString(); //URL part 2 assigns a random keyword 
-  let longUrl = req.body.longURL;
-  let userID = req.session.userId;
-  let newURL = {
-    "userID": userID,
-    "shortURL":shortUrl,
-    "longURL": longUrl,
-  }
-  urlDatabase[shortUrl] = newURL; //URL part 2 assigning what long url we type to the random gen num
-  res.redirect(`/urls`); //(/urls/${shortUrl})URL part 2 redirect to the page that has the short url 
-})
-
-//Post for deleting a url
-app.post("/urls/:id/delete", (req, res) => {
-  delete urlDatabase[req.params.id]//DELETING URLS: url database //req.body gets info from form inputs req.params = retrieve from the routes
-  //console.log("REQ.PARAMS === ", req.params.id); DELETING URLS: //test to see what it gets
-  res.redirect(`/urls`); //redirect to indexpage //DELETING URLS: can inspect source for a lot of things
-})
-
-//Post for Updating a URl
 app.post("/urls/:id", (req, res) => {
-  //extract the value of the id in the url
-  //req.params
-  //console.log(req.params);
   const shortUrlId = req.params.id;
-  //extract the long url value from the form
-  //console.log(req.body);
   const longUrl = req.body.longURL;
-  //req.body
-  //update the value in the url database
   urlDatabase[shortUrlId].longURL = longUrl;
-
-  //name key=value
-  //redirect to /urls
   res.redirect(`/urls`);
 })
+
+app.post("/urls/:id/delete", (req, res) => {
+  delete urlDatabase[req.params.id]
+  res.redirect(`/urls`);
+})
+
 
 //Logout Post for _header
 app.post("/logout", (req, res) => {
-  //clearcookie
-  req.session.userId = null; // before: res.clearCookie("userId");
+  req.session.userId = null; //clearcookie;
   res.redirect(`/urls`);
 })
-
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
 
-//above is using express exercise. 
-//i mixed javascript code with html markup
 
-//Functions
+//--------------------Functions------------------
+
 
 //generates random 6 string id
 function generateRandomString() {

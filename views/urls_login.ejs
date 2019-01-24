@@ -6,19 +6,24 @@
   
     <body>
         <h3>Login Page</h3>
+
         <% if (user) { %>
             <h2><%= user %></h2>
-            <form action= "/logout" method="POST"">
-                <input type="submit" value="Logout"> <!--logout button -->
+            <!--logout button -->
+            <form action= "/logout" method="POST">
+                <input type="submit" value="Logout"> 
             </form>
+
         <% } else { %>
-            <form action= "/login" method="POST"">
+            <!--login button -->
+            <form action= "/login" method="POST">
                 <label for="email">E-mail: </label>
                 <input id="email" type="email" name="email">
                 <label for="password">Password: </label>
                 <input id="password" type="password" name="password">
-                <input type="submit" value="Login"> <!--login button -->
+                <input type="submit" value="Login"> 
             </form>
         <% } %>
+        
     </body>
 </html>
