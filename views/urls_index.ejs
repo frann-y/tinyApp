@@ -2,17 +2,14 @@
 <html lang = "en">
     <head>
         <title>TinyApp</title>
+        <% include partials/_header %>
     </head>
    
-    <body>
-        <% include partials/_header %>
-        
+    <body>  
         <div>
             <ul>
-
             <!--Loop through Urls and display long and short-->
             <% if (user) { %>    
-
                 <!--Display the Users short and long URLS to edit or delete-->  
                 <% for (var shortURL in urls) { %>
                     <li>
@@ -23,8 +20,9 @@
                     <br>
                     
                     <!-- Edit Link -->
-                    <a href= "/urls/<%= shortURL %>">Edit</a>
-                    
+                    <form method="GET" action="/urls/<%= shortURL %>"> 
+                        <input type="submit" value="Edit">
+                    </form>
                     <br>
                     
                     <!-- Delete Button -->
@@ -32,24 +30,19 @@
                         <input type="submit" value="Delete">
                     </form>
                 </li>
-
                 <% } %>
             <% } else { %>
-
                 <!--Ask user to Login-->
                 <h3>Please Login...</h3>
                 <form action= "/login" method="GET"">
                     <input type="submit" value="Login"> 
                 </form>
-
             <% } %>
-
             </ul>
         </div>
     </body>
 
     <body>
-
         <ul>
         <!-- Form to Create a New Url -->
         <h4>Add a New URL</h4>
@@ -57,13 +50,5 @@
             <input type = 'submit' value = "New URL">
         </form>
         </ul>
-        
     </body>
 </html>
-
-
-
-
-
-
-

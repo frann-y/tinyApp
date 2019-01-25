@@ -24,62 +24,63 @@ var urlDatabase = {
     longURL: "http://www.lighthouselabs.ca",
   },
   "9sm5xK": {
-    userID: "bob",
+    userID: "Bob",
     shortURL: "9sm5xK",
     longURL: "http://www.google.com"
   }
 };
 
 //User objects. Data stored for users.
-const users = { 
-  "userRandomID": {
-    id: "userRandomID", 
-    email: "user@example.com", 
-    password: "purple",
-    hashedPassword: bcrypt.hashSync("purple", 10),
-
-  },
- "user2RandomID": {
-    id: "user2RandomID", 
-    email: "user2@example.com", 
-    password: "funk",
-    hashedPassword: bcrypt.hashSync("funk", 10),
-  },
-  "Archie" : {
-    id: "archieID",
-    email: "andrews@example.com",
-    password: "<3veronicaLodge",
-    hashedPassword: bcrypt.hashSync("<3veronicaLodge", 10),
-  },
-  "Bob" : {
-    id: "bob",
-    email: "bob@example.com",
-    password: "bob",
-    hashedPassword: bcrypt.hashSync("bob", 10),
-  }
-}
+  const users = { 
+    "userRandomID": {
+      id: "userRandomID", 
+      email: "user@example.com", 
+      password: "purple",
+      hashedPassword: bcrypt.hashSync("purple", 10),
+  
+    },
+   "user2RandomID": {
+      id: "user2RandomID", 
+      email: "user2@example.com", 
+      password: "funk",
+      hashedPassword: bcrypt.hashSync("funk", 10),
+    },
+    "Archie" : {
+      id: "Archie",
+      email: "andrews@example.com",
+      password: "<3veronicaLodge",
+      hashedPassword: bcrypt.hashSync("<3veronicaLodge", 10),
+    },
+    "Bob" : {
+      id: "Bob",
+      email: "bob@example.com",
+      password: "bob",
+      hashedPassword: bcrypt.hashSync("bob", 10),
+    }
+  };
 
 //----------------Get/Post-----------------------------
 //Adding routes: the order of route definitions matters
 
 app.get("/", (req, res) => {
-  res.send("Hello!");
-});
-
-app.get("/urls.json", (req, res) => {
-  res.json(urlDatabase);
-});
-
-app.get("/hello", (req, res) => {
-  res.send("<html><body>Hello <b>World</b></body></html>\n");
+  if (req.session.userId) {
+    res.redirect("/urls");
+  } else {
+    res.redirect("/login");
+  }
 });
 
 app.get("/urls",  (req, res) => {
+  if (req.session.userId) {
     let templateVars = { 
       urls: urlsForUser(req.session.userId),
-      user: req.session.userId,
-     };
+      user: users[req.session.userId],
+    };
     res.render("urls_index", templateVars);
+  } else {
+    res.status(403);
+    res.send('<html><body>Error 403: Please <a href= "/login">Login.</a></body></html>');
+  }
 });
 
 app.post("/urls", (req, res) => {
@@ -93,13 +94,12 @@ app.post("/urls", (req, res) => {
   }
   urlDatabase[shortUrl] = newURL; //URL part 2 assigning what long url we type to the random gen num
   res.redirect(`/urls`);
-})
-
+});
 
 app.get("/urls/new", (req, res) => {
   let templateVars = { 
     urls: urlDatabase,
-    user: req.session.userId,
+    user: users[req.session.userId],
   }
   //check if user is logged in
   if (req.session.userId) {
@@ -111,17 +111,25 @@ app.get("/urls/new", (req, res) => {
 
 //adding a route to handle shortURL requests
 app.get("/u/:shortURL", (req, res) => {
-  let longURL = urlDatabase[req.params.shortURL].longURL; 
-  res.redirect(longURL);
+  if (!urlDatabase[req.params.shortURL]) {
+    res.status(404).send(`Error 404: This page does not exist.`);
+  } else {
+    let longURL = urlDatabase[req.params.shortURL].longURL; 
+    res.redirect(longURL);
+  }
 });
 
 app.get("/register", (req, res) => {
-  let templateVars = { 
-    urls: urlsForUser(req.session.userId),
-    user: req.session.userId,
-   };
- res.render("urls_register", templateVars);
-})
+  if (req.session.userId) {
+    res.redirect("/urls");
+  } else {
+    let templateVars = { 
+      urls: urlsForUser(req.session.userId),
+      user: users[req.session.userId],
+    };
+    res.render("urls_register", templateVars);
+  }
+});
 
 app.post("/register", (req, res) => {
    let userId = generateRandomString();
@@ -138,10 +146,10 @@ app.post("/register", (req, res) => {
  
    if (!password || !newEmail ) {
      res.status(400);
-     res.send('Empty form');
+     res.send('<html><body>Error: Empty form. <a href="/register">Please try again.</a></body></html>');
    } else if (uniqueEmail() === false) {
      res.status(400);
-     res.send('Email in use!');
+     res.send('<html><body>Error: Email already in use. <a href="/register">Please try again.</a></body></html>');
    } else {
      users[userId] = newUser;
      req.session.userId = userId;
@@ -149,23 +157,26 @@ app.post("/register", (req, res) => {
    }
  
    function uniqueEmail() {
-     for (let user in users) {
-       if (users[user].email === newEmail) {
-         return false;
-       }
-     }
-     return true;
+    for (let user in users) {
+      if (users[user].email === newEmail) {
+        return false;
+      }
+    }
+    return true;
    }
-
  });
 
 app.get("/login", (req, res) => {
-  let templateVars = { 
-    urls: urlsForUser(req.session.userId),
-    user: req.session.userId,
-   };
-  res.render("urls_login", templateVars);
-})
+  if (req.session.userId) {
+    res.redirect("/urls");
+  } else {
+    let templateVars = { 
+      urls: urlsForUser(req.session.userId),
+      user: users[req.session.userId],
+    };
+    res.render("urls_login", templateVars);
+  }
+});
 
 app.post("/login", (req, res) => {
   let email = req.body.email;
@@ -175,7 +186,7 @@ app.post("/login", (req, res) => {
     req.session.userId = loginID;
     res.redirect('/urls');
   } else {
-    res.status(403).send('Error 403: Something went wrong.');
+    res.status(403).send('<html><body>Error: Something went wrong. <a href="/login">Please try again.</a></body></html>');
   }
 
   function signInCheck() {
@@ -193,16 +204,20 @@ app.post("/login", (req, res) => {
 
 
 app.get("/urls/:id", (req, res) => {
-  let templateVars = {
-    shortURL:  req.params.id, 
-    longURL: urlDatabase[req.params.id].longURL,
-    user: req.session.userId,
-    urls: urlsForUser(req.session.userId)
-  };
-  if (req.session.userId === urlDatabase[req.params.id].userID) {
+  if (req.session.userId && req.session.userId === urlDatabase[req.params.id].userID){
+    let templateVars = {
+      shortURL:  req.params.id, 
+      longURL: urlDatabase[req.params.id].longURL,
+      user: users[req.session.userId],
+      urls: urlsForUser(req.session.userId),
+    };
     res.render("urls_show", templateVars);
-  } else {
-    res.status(403).send(`Error 403: You do not have access to this page.`);
+  } else if (!urlDatabase[req.params.id]) {
+    res.status(404).send(`Error 404: This page does not exist.`);
+  } else if (!req.session.userId) {
+    res.status(403).send('<html><body>Error 403: Please <a href= "/login">Login.</a></body></html>');
+  } else if (req.session.userId && req.session.userId !== urlDatabase[req.params.id].userID) {
+    res.status(403).send('Error 403: You do not have access to this page.');
   }
 });
 
@@ -211,17 +226,24 @@ app.post("/urls/:id", (req, res) => {
   const longUrl = req.body.longURL;
   urlDatabase[shortUrlId].longURL = longUrl;
   res.redirect(`/urls`);
-})
+});
 
 app.post("/urls/:id/delete", (req, res) => {
-  delete urlDatabase[req.params.id]
-  res.redirect(`/urls`);
-})
+  if(req.session.userId && req.session.userId === urlDatabase[req.params.id].userID) {
+    delete urlDatabase[req.params.id];
+    res.redirect(`/urls`);
+  } else if (!req.session.userId) {
+    res.status(403);
+    res.send('<html><body>Error 403: Please <a href= "/login">Login.</a></body></html>');
+  } else if (req.session.userId && req.session.userId !== urlDatabase[req.params.id].userID){
+    res.status(403).send('Error 403: You do not have access to this page.');
+  }
+});
 
 
 //Logout Post for _header
 app.post("/logout", (req, res) => {
-  req.session.userId = null; //clearcookie;
+  req.session = null; //clearcookie;
   res.redirect(`/urls`);
 })
 
@@ -236,7 +258,7 @@ app.listen(PORT, () => {
 //generates random 6 string id
 function generateRandomString() {
   return uuidv4().substr(0, 6);
-}
+};
 
 //filterlist to see only their urls
 function urlsForUser(id) {
@@ -247,4 +269,4 @@ function urlsForUser(id) {
     }
   }
   return filtered;
-}
+};

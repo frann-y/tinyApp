@@ -4,7 +4,7 @@
 
     <!-- Login Form-->
     <% if (user) { %>
-        <h2><%= user %></h2>
+        <h2><%= user.email %></h2>
         <form action= "/logout" method="POST">
             <!--logout button -->
             <input type="submit" value="Logout"> 
