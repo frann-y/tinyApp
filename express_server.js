@@ -3,7 +3,7 @@ const bodyParser = require("body-parser");
 const uuidv4 = require('uuid/v4');
 const express = require("express");
 const app = express();
-const PORT = 8080; // default port 8080
+const PORT = 8080;
 const cookieSession = require('cookie-session');
 const bcrypt = require('bcrypt');
 
@@ -13,7 +13,7 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieSession({
   name: 'session',
   keys: ["key1", "key2"],
-}))
+}));
 
 
 //URL Database by ID
@@ -142,7 +142,7 @@ app.post("/register", (req, res) => {
      email: newEmail,
      password: password,
      hashedPassword: hashedPassword, //setting hashed passwords in the new UserObject 
-   }
+   };
  
    if (!password || !newEmail ) {
      res.status(400);
@@ -163,7 +163,7 @@ app.post("/register", (req, res) => {
       }
     }
     return true;
-   }
+   };
  });
 
 app.get("/login", (req, res) => {
@@ -199,7 +199,7 @@ app.post("/login", (req, res) => {
       }
     }
     return false;
-  }
+  };
 });
 
 
@@ -245,7 +245,7 @@ app.post("/urls/:id/delete", (req, res) => {
 app.post("/logout", (req, res) => {
   req.session = null; //clearcookie;
   res.redirect(`/urls`);
-})
+});
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
